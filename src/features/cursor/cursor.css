@@ -1,0 +1,76 @@
+/*
+ * Ring that trails the native cursor. The native pointer stays visible — this
+ * is an accent, not a replacement, so clicking and text carets keep the
+ * precision the OS pointer gives.
+ *
+ * The ring element is 0x0 at the pointer and only carries transform
+ * (position + rotation + stretch). Sizing lives on the inner element so the
+ * two never fight over the same property.
+ */
+
+.aq-cursor {
+  --cursor-size: 30px;
+  --cursor-expand: 78px;
+  --cursor-color: var(--aq-ink);
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.aq-cursor--on {
+  opacity: 1;
+}
+
+/* Position + stretch. Rotating this scales the ellipse along travel. */
+.aq-cursor__ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  will-change: transform;
+}
+
+/* Size + hover expansion. Kept separate so stretch and size compose. */
+.aq-cursor__ring-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  translate: -50% -50%;
+  width: var(--cursor-size);
+  height: var(--cursor-size);
+  border-radius: 999px;
+  border: 1px solid var(--cursor-color);
+  opacity: 0.5;
+  transition:
+    width 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    height 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.3s ease,
+    background-color 0.3s ease;
+}
+
+/* Over anything interactive the ring opens up. */
+.aq-cursor--expand .aq-cursor__ring-inner {
+  width: var(--cursor-expand);
+  height: var(--cursor-expand);
+  opacity: 0.9;
+}
+
+/* Press feedback. */
+.aq-cursor--down .aq-cursor__ring-inner {
+  width: 22px;
+  height: 22px;
+  opacity: 1;
+}
+
+/* Coarse pointers and reduced motion never show a ring. */
+@media (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .aq-cursor {
+    display: none;
+  }
+}

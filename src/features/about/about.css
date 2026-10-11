@@ -1,0 +1,119 @@
+/*
+ * About: fat cardless typography over the high orbit.
+ *
+ * Sliding mechanics (.slide base) come from ../apply/apply.css; here only the
+ * per-stop wrapper and the editorial styles. Each stop enters from its side
+ * (--from) and holds only while the camera stands in its orbit window.
+ */
+
+.about-sec {
+  /* Long traverse: each stop owns ~115svh, so every fragment holds centred
+     in the viewport for a long scroll instead of flashing by. */
+  min-height: 400svh;
+}
+
+.about-sec .tab-inner {
+  display: grid;
+  gap: 0;
+  align-content: start;
+  max-height: none;
+  overflow: visible;
+}
+
+.about-stop {
+  min-height: 115svh;
+  display: grid;
+  align-content: center;
+  gap: 18px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(calc(var(--from, -1) * 55vw));
+  transition:
+    opacity 0.7s ease,
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 0.9s;
+  will-change: transform;
+}
+
+.about-stop[data-visible="true"] {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+  transition:
+    opacity 0.7s ease,
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 0s;
+}
+
+.about-stop .giant span {
+  display: block;
+}
+
+.about-stop .giant--right {
+  text-align: right;
+}
+
+.about-lede {
+  margin: 0;
+  font-family: var(--aq-sans);
+  font-size: clamp(24px, 3.4vw, 44px);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--aq-ink);
+  max-width: 22ch;
+  text-wrap: balance;
+}
+
+.about-facts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+.about-fact {
+  display: grid;
+  gap: 2px;
+  align-content: start;
+  /* Without this a grid item refuses to shrink below its content, so a long
+     value pushes the neighbour out of its column instead of wrapping. */
+  min-width: 0;
+}
+
+.about-fact__num {
+  font-family: var(--aq-sans);
+  font-weight: 800;
+  font-size: clamp(44px, 7vw, 110px);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  /* Belt and braces: a word too long for the column wraps rather than
+     colliding with the next figure. */
+  overflow-wrap: anywhere;
+}
+
+.about-fact__label {
+  font-family: var(--aq-mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--aq-muted);
+}
+
+@media (max-width: 640px) {
+  .about-facts {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-stop {
+    transition: none;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+}

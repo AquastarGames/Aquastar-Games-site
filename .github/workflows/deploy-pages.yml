@@ -1,0 +1,61 @@
+name: Deploy to GitHub Pages
+
+# Push to main -> build a static export -> publish to Pages.
+# The Pages site must already exist with Source = "GitHub Actions"
+# (repo Settings -> Pages); actions/configure-pages fails without it.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two deploys race. In-flight ones are cancelled.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - id: pages
+        uses: actions/configure-pages@v5
+        # Emits base_path = "" for <user>.github.io, "/<repo>" for a project site.
+        # next.config.ts turns it on and re-uses it in layout.tsx for the font URL.
+
+      # Assets are committed under public/assets, so no `npm run assets:*` here.
+      # If ktx2/basis files are ever gitignored again, this step needs the
+      # KTX-Software `toktx` binary on PATH — the GitHub runners do not have it.
+      - name: Build static export
+        env:
+          DEPLOY_TARGET: pages
+          NEXT_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        run: npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

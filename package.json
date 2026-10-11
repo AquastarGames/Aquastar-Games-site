@@ -1,0 +1,57 @@
+{
+  "name": "aquastar-games",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Aquastar Games — award-grade 3D game studio site",
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "preview": "npx --yes serve out",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+
+    "assets:mark": "tsx scripts/generate-mark.ts public/fonts/wordmark.ttf",
+    "assets:textures": "tsx scripts/process-textures.ts",
+    "assets:models": "tsx scripts/process-models.ts"
+  },
+  "dependencies": {
+    "next": "^16.4.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+
+    "three": "^0.186.1",
+    "@react-three/fiber": "^9.8.1",
+    "@react-three/drei": "^10.7.9",
+    "@react-three/postprocessing": "^3.2.0",
+
+    "gsap": "^3.15.0",
+    "lenis": "^1.3.26",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.186.0",
+
+    "tailwindcss": "^4.3.3",
+    "@tailwindcss/postcss": "^4.3.3",
+    "postcss": "^8.4.49",
+
+    "opentype.js": "^2.0.0",
+    "@gltf-transform/core": "^4.5.1",
+    "@gltf-transform/extensions": "^4.5.1",
+    "@gltf-transform/functions": "^4.5.1",
+    "draco3d": "^1.5.7",
+    "draco3dgltf": "^1.5.7",
+    "meshoptimizer": "^1.3.0",
+    "sharp": "^0.35.5",
+    "tsx": "^4.23.15"
+  }
+}

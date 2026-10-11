@@ -1,0 +1,33 @@
+node_modules/
+.next/
+out/
+build/
+
+# Local agent tooling state — screenshots and session data, not source.
+.openchamber/
+
+.env*
+!.env.example
+
+# Raw source assets — never ship these. Process them via scripts/.
+src/assets/raw/
+*.blend
+*.blend1
+*.psd
+*.max
+
+# Processed binaries are large — keep them out of git and rebuild via
+# `npm run assets:*` in CI. Everything else under public/assets IS committed.
+public/assets/**/*.ktx2
+public/assets/**/*.bin
+public/assets/**/*.basis
+
+# Never commit a hard-coded toktx flag; document it instead.
+*.tmp
+
+.DS_Store
+Thumbs.db
+*.tsbuildinfo
+next-env.d.ts
+.vscode/
+.idea/

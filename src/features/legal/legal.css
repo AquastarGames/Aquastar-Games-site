@@ -1,0 +1,515 @@
+/*
+ * Legal documents — a reading surface, not a stage.
+ *
+ * The journey pages are full-bleed, camera-driven and locked to one tab at a
+ * time (features/apply). A policy document is the opposite: a long, quiet,
+ * scrollable column that has to stay indexable and readable with no WebGL at
+ * all (ARCHITECTURE §2.5 — content is HTML, canvas is enhancement). So these
+ * live on their own routes with their own chrome, and borrow only the palette.
+ *
+ * Typographic discipline is grounded in a real editorial system (Typewolf,
+ * via OpenDesign): a ~680px measure, 16px body, uppercase 13px labels, sharp
+ * corners (radius 0 — this reference has no soft radii), a 4px spacing scale
+ * and 220ms micro-transitions. Colours and faces are the project's own tokens,
+ * because the library's mauve palette would break the brand.
+ */
+
+/* ------------------------------------------------------------------- shell */
+
+.legal {
+  min-height: 100svh;
+  background: var(--aq-paper);
+  color: var(--aq-ink);
+  /* The journey's scroll guard is not mounted here, so this page owns its own
+     scrolling — but it must not inherit a sticky canvas from the root layout. */
+  position: relative;
+  z-index: 1;
+}
+
+.legal-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px clamp(20px, 5vw, 56px);
+  /* Opaque, not backdrop-filtered: a blurred sticky bar has to re-composite the
+     page behind it on every scroll frame, which is exactly the cost ARCHITECTURE
+     §5 keeps off the scroll path. The paper is flat, so nothing is lost. */
+  background: var(--aq-paper);
+  border-bottom: 1px solid color-mix(in srgb, var(--aq-ink) 12%, transparent);
+}
+
+.legal-bar__brand {
+  font-family: var(--aq-sans);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--aq-ink);
+  text-decoration: none;
+}
+
+.legal-bar__brand sup {
+  font-size: 0.6em;
+  vertical-align: super;
+}
+
+.legal-bar__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--aq-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--aq-muted);
+  text-decoration: none;
+  transition: color 0.22s ease;
+}
+
+.legal-bar__back:hover {
+  color: var(--aq-tide);
+}
+
+/* -------------------------------------------------------------------- hero */
+
+.legal-hero {
+  padding: clamp(48px, 9vh, 104px) clamp(20px, 5vw, 56px) clamp(32px, 5vh, 56px);
+  border-bottom: 1px solid color-mix(in srgb, var(--aq-ink) 12%, transparent);
+}
+
+.legal-hero__inner {
+  max-width: 680px;
+}
+
+.legal-kicker {
+  margin: 0 0 20px;
+  font-family: var(--aq-mono);
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--aq-muted);
+}
+
+/* Serif, because this is the site's editorial voice (the hero headline uses
+   the same --aq-display face). The journey pages lean on heavy sans; a document
+   that looked like a section banner would not read as a document. */
+.legal-title {
+  margin: 0;
+  font-family: var(--aq-display);
+  font-size: clamp(42px, 7vw, 88px);
+  font-weight: 400;
+  line-height: 0.98;
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+}
+
+.legal-standfirst {
+  margin: 20px 0 0;
+  max-width: 46ch;
+  font-family: var(--aq-sans);
+  font-size: clamp(17px, 1.7vw, 22px);
+  line-height: 1.4;
+  color: var(--aq-muted);
+  text-wrap: pretty;
+}
+
+.legal-effective {
+  margin: 24px 0 0;
+  font-family: var(--aq-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--aq-muted);
+}
+
+/* Operator / product rail. Sharp corners — no soft radius, per the reference. */
+.legal-meta {
+  margin: 40px 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  border: 1px solid color-mix(in srgb, var(--aq-ink) 16%, transparent);
+}
+
+.legal-meta__row {
+  display: grid;
+  gap: 4px;
+  padding: 16px 18px;
+  border-right: 1px solid color-mix(in srgb, var(--aq-ink) 12%, transparent);
+}
+
+.legal-meta__row:last-child {
+  border-right: 0;
+}
+
+.legal-meta__label {
+  font-family: var(--aq-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--aq-muted);
+}
+
+.legal-meta__value {
+  font-family: var(--aq-sans);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* ----------------------------------------------------------------- summary */
+
+.legal-summary {
+  margin: clamp(32px, 5vh, 48px) 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1px;
+  background: color-mix(in srgb, var(--aq-ink) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--aq-ink) 14%, transparent);
+}
+
+.legal-summary__card {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  padding: 20px;
+  background: var(--aq-paper);
+}
+
+.legal-summary__title {
+  margin: 0;
+  font-family: var(--aq-sans);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.legal-summary__text {
+  margin: 0;
+  font-family: var(--aq-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--aq-muted);
+  text-wrap: pretty;
+}
+
+/* ------------------------------------------------------------ shell + rail */
+
+.legal-shell {
+  display: grid;
+  /* The rail is the signature move: a long policy is unnavigable without one.
+     Auto tracks collapse it under the article on narrow screens. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 680px) minmax(0, 1fr);
+  gap: clamp(24px, 4vw, 48px);
+  padding: clamp(40px, 7vh, 80px) clamp(20px, 5vw, 56px) clamp(64px, 12vh, 128px);
+}
+
+.legal-shell__article {
+  grid-column: 2;
+  min-width: 0;
+}
+
+/* ------------------------------------------------------------------- rail */
+
+.legal-rail {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: start;
+  position: sticky;
+  top: 92px;
+}
+
+.legal-rail__label {
+  margin: 0 0 14px;
+  font-family: var(--aq-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--aq-muted);
+}
+
+.legal-rail__track {
+  position: relative;
+  padding-left: 16px;
+  border-left: 1px solid color-mix(in srgb, var(--aq-ink) 14%, transparent);
+}
+
+/* Reading progress. Written straight to the custom property from a passive
+   scroll listener — a percentage that changes every frame must not re-render
+   React (ARCHITECTURE §2.3). */
+.legal-rail__progress {
+  position: absolute;
+  left: -1px;
+  top: 0;
+  width: 1px;
+  height: calc(var(--read, 0) * 100%);
+  background: var(--aq-tide);
+  transition: height 0.12s linear;
+}
+
+.legal-rail__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.legal-rail__link {
+  display: block;
+  padding: 4px 0;
+  font-family: var(--aq-sans);
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: var(--aq-muted);
+  text-decoration: none;
+  opacity: 0.65;
+  transition:
+    color 0.22s ease,
+    opacity 0.22s ease;
+}
+
+.legal-rail__link:hover {
+  color: var(--aq-ink);
+  opacity: 1;
+}
+
+.legal-rail__link[data-active="true"] {
+  color: var(--aq-tide);
+  font-weight: 600;
+  opacity: 1;
+}
+
+/* ------------------------------------------------------------------- body */
+
+.legal-body {
+  font-family: var(--aq-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--aq-ink);
+}
+
+.legal-body > * + * {
+  margin-top: 1.15em;
+}
+
+.legal-body p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.legal-body h3 {
+  margin: 2.4em 0 0;
+  font-family: var(--aq-sans);
+  font-size: clamp(18px, 2vw, 22px);
+  font-weight: 700;
+  letter-spacing: -0.012em;
+  line-height: 1.25;
+  /* Anchor targets clear the sticky bar instead of hiding beneath it. */
+  scroll-margin-top: 92px;
+}
+
+.legal-body h3:first-child {
+  margin-top: 0;
+}
+
+.legal-body ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.7em;
+}
+
+.legal-body li {
+  position: relative;
+  padding-left: 22px;
+}
+
+/* A dash, not a filled disc — the journey pages are already full of round
+   shapes; a small mark keeps the list from echoing them. */
+.legal-body li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.72em;
+  width: 12px;
+  height: 1px;
+  background: var(--aq-tide);
+}
+
+.legal-body strong {
+  font-weight: 700;
+}
+
+.legal-body a {
+  color: var(--aq-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color 0.22s ease;
+}
+
+.legal-body a:hover {
+  color: var(--aq-tide);
+}
+
+.legal-body code {
+  font-family: var(--aq-mono);
+  font-size: 0.86em;
+  padding: 2px 6px;
+  border-radius: 2px;
+  background: var(--aq-deep);
+  /* Long identifiers like Application.persistentDataPath must not push the
+     680px column wider and break the measure. */
+  overflow-wrap: anywhere;
+}
+
+.legal-callout {
+  margin-top: 2em;
+  display: grid;
+  gap: 6px;
+  padding: 20px 22px;
+  border-left: 2px solid var(--aq-tide);
+  background: var(--aq-surface);
+}
+
+.legal-callout__title {
+  margin: 0;
+  font-family: var(--aq-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--aq-tide);
+}
+
+.legal-callout__text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+/* ------------------------------------------------------------------- foot */
+
+.legal-foot {
+  border-top: 1px solid color-mix(in srgb, var(--aq-ink) 12%, transparent);
+  padding: clamp(28px, 5vh, 48px) clamp(20px, 5vw, 56px);
+}
+
+.legal-foot__inner {
+  max-width: 680px;
+  margin: 0 auto;
+  display: grid;
+  gap: 20px;
+}
+
+.legal-foot__label {
+  margin: 0;
+  font-family: var(--aq-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--aq-muted);
+}
+
+.legal-foot__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.legal-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid color-mix(in srgb, var(--aq-ink) 18%, transparent);
+  font-family: var(--aq-sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--aq-ink);
+  text-decoration: none;
+  transition:
+    border-color 0.22s ease,
+    color 0.22s ease,
+    background 0.22s ease;
+}
+
+.legal-chip:hover {
+  border-color: var(--aq-tide);
+  color: var(--aq-tide);
+  background: color-mix(in srgb, var(--aq-tide) 6%, transparent);
+}
+
+.legal-chip[aria-current="page"] {
+  border-color: var(--aq-tide);
+  background: var(--aq-tide);
+  color: var(--aq-surface);
+}
+
+.legal-foot__meta {
+  margin: 0;
+  font-family: var(--aq-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--aq-muted);
+}
+
+/* -------------------------------------------------------------- responsive */
+
+/* Below this the three-track grid cannot hold its centre column, so the rail
+   moves under the hero as a plain wrapped list rather than being squeezed. */
+@media (max-width: 1080px) {
+  .legal-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .legal-shell__article {
+    grid-column: 1;
+    order: 2;
+  }
+
+  .legal-rail {
+    grid-column: 1;
+    grid-row: auto;
+    order: 1;
+    position: static;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid color-mix(in srgb, var(--aq-ink) 12%, transparent);
+  }
+
+  .legal-rail__track {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  /* The progress bar is meaningless in a wrapped list. */
+  .legal-rail__progress {
+    display: none;
+  }
+
+  .legal-rail__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .legal-meta__row {
+    border-right: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--aq-ink) 12%, transparent);
+  }
+
+  .legal-meta__row:last-child {
+    border-bottom: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .legal-rail__progress {
+    transition: none;
+  }
+}

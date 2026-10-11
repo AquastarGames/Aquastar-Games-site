@@ -1,0 +1,178 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Paper headline check</title>
+<style>
+  html,body{margin:0;height:100%;background:#f4efe7;overflow:hidden}
+  canvas{display:block}
+  #hud{position:fixed;left:8px;top:8px;z-index:9;padding:8px 12px;
+    background:#fff;color:#0a0;font:12px/1.5 ui-monospace,monospace;white-space:pre}
+</style></head>
+<body>
+<div id="hud">booting…</div>
+<script type="module">
+import * as THREE from "/vendor/three.module.js";
+
+const VERTEX = "\nuniform float uTime;\nuniform float uAmp;       // peak displacement, world units\nuniform float uStretch;   // horizontal elongation where the sheet is pulled\nuniform float uFold;      // resting fold depth\nuniform float uRadius;    // how far a puff's ring travels\nuniform float uGain;      // vertical lift per unit of gust\nuniform vec2 uHalfSize;   // plane half-extent, world units\nuniform vec2 uSize;       // plane full extent, world units\n\n/**\n * The geometry is a unit quad (position.xy in [-0.5, 0.5]) and the mesh is\n * scaled by uSize. Every term below works in WORLD units, so the local\n * position has to be converted first — mixing the two scales is how puffs end\n * up flying twelve times too far from the glyphs and the sheet never reacts.\n */\n\n// xy = centre (world), z = age 0..1, w = strength\nuniform vec4 uPuffs[8];\n// xy = unit travel direction, z = width, w = unused\nuniform vec4 uPuffShape[8];\n\nvarying vec2 vUv;\nvarying float vShade;\nvarying float vWind;\n\n/**\n * Height contributed by one puff at world-space point p.\n * Kept as a function so main() can re-sample it for the normal.\n */\nfloat puffAt(vec2 p, int i) {\n  vec4 g = uPuffs[i];\n  if (g.w <= 0.0001) return 0.0;\n\n  vec4 shape = uPuffShape[i];\n  vec2 dir = shape.xy;\n  vec2 rel = p - g.xy;\n\n  // Elongate the gust along travel: a hand moving fast makes a streak, not a dot.\n  float along = dot(rel, dir);\n  float across = dot(rel, vec2(-dir.y, dir.x));\n  float d = length(vec2(along * 0.55, across));\n\n  // The ring expands with age — this is what \"wind travels\" looks like.\n  float r = g.z * uRadius;\n  float band = (d - r) / shape.z;\n  float ring = exp(-band * band);\n\n  // Fast attack, long decay. A gust arrives and leaves; it does not fade in.\n  float age = g.z;\n  float life = age < 0.12 ? age / 0.12 : 1.0 - (age - 0.12) / 0.88;\n  life = clamp(life, 0.0, 1.0);\n\n  return ring * g.w * life;\n}\n\n/** Total wind displacement vector at p, including the resting fold. */\nvec2 sheetAt(vec2 p) {\n  // Resting folds: soft vertical ridges with a very slow breath, so the\n  // sheet never looks like a flat plate even when nobody is touching it.\n  float fold = sin(p.x * 1.9 + 0.6) * 0.35 + sin(p.x * 4.3 - 1.1) * 0.15;\n  fold *= 0.55 + 0.45 * sin(uTime * 0.23);\n\n  float gust = 0.0;\n  vec2 push = vec2(0.0);\n  for (int i = 0; i < 8; i++) {\n    float h = puffAt(p, i);\n    gust += h;\n    // A gust also shoves the sheet along its travel direction.\n    push += uPuffShape[i].xy * h;\n  }\n\n  return vec2(fold * uFold + gust * uAmp, push * uGain * gust);\n}\n\nvoid main() {\n  vUv = uv;\n\n  // Local -> world. See the note on uSize.\n  vec2 p = position.xy * uSize;\n  // Finite differences step in world units, so they must scale with the plane\n  // or the derived normal becomes resolution-dependent.\n  float eps = max(uSize.y, uSize.x) * 0.0015;\n\n  vec2 here = sheetAt(p);\n  // Finite-difference normal. Three extra field samples is the entire budget.\n  float dx = sheetAt(p + vec2(eps, 0.0)).x - here.x;\n  float dy = sheetAt(p + vec2(0.0, eps)).x - here.x;\n\n  // The normal comes from the world-space gradient, so it has to be divided back\n  // out by the sample step — otherwise the shading silently depends on the size\n  // of the plane rather than on the shape of the sheet.\n  float gradY = dy / eps;\n  vShade = 0.86 + 0.14 * clamp(-gradY * 20.0, -1.0, 1.0);\n  vWind = clamp(here.x / max(uAmp, 0.0001) * 2.0, 0.0, 1.0);\n\n  vec3 pos = position;\n  // z is unscaled (mesh.scale.z === 1), so world units pass straight through.\n  pos.z = here.x;\n  // x/y ARE scaled by the mesh, so a world-unit push has to be divided back\n  // down or it lands uSize times too far away.\n  pos.xy += here.y / uSize;\n\n  // Thin material elongates where it is pulled. Anchored at the edges so the\n  // headline keeps its measure instead of creeping outward.\n  float edge = smoothstep(1.0, 0.25, abs(p.x) / max(uHalfSize.x, 0.0001));\n  pos.x *= 1.0 + clamp(here.x / max(uAmp, 0.0001), 0.0, 1.0) * uStretch * edge;\n\n  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);\n}\n";
+const FRAGMENT = "\nuniform sampler2D uMap;\nuniform vec3 uColor;\nuniform float uOpacity;\n\nvarying vec2 vUv;\nvarying float vShade;\nvarying float vWind;\n\nvoid main() {\n  // The texture is a coverage mask: white glyphs on transparent. Sample the\n  // alpha and re-anti-alias it with fwidth so the text stays crisp when the\n  // plane is scaled up — a raw texture() fetch aliases visibly at 1.14x.\n  float a = texture2D(uMap, vUv).a;\n\n  float w = fwidth(a) * 0.7 + 0.0008;\n  a = smoothstep(0.5 - w, 0.5 + w, a);\n\n  if (a < 0.004) discard;\n\n  // Wind slightly lifts the sheet toward the light — dust catching the sun.\n  vec3 tint = mix(uColor, uColor * 1.16, vWind * 0.5);\n  gl_FragColor = vec4(tint * vShade, a * uOpacity);\n}\n";
+
+const q = new URLSearchParams(location.search);
+const PUFFS = q.has("puffs") ? +q.get("puffs") : 0;
+const W = +(q.get("w") || 1100);
+const H = +(q.get("h") || 367);
+const LOG = [];
+
+const hud = document.getElementById("hud");
+function flush() { hud.textContent = LOG.join("\n"); }
+
+try {
+  run();
+} catch (e) {
+  LOG.push("THREW: " + (e && e.message ? e.message : String(e)));
+  LOG.push(String((e && e.stack) || "").split("\n").slice(0, 5).join("\n"));
+  flush();
+}
+
+function run() {
+
+// --- the same constants textTexture.ts uses -------------------------------
+const DISPLAY_FONT = '"Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif';
+const LETTER_SPACING = -0.02;
+const LINE_HEIGHT = 1.02;
+const PADDING = 0.34;
+const LINES = ["Deep worlds,", "slow burn."];
+
+function drawHeadline(lines, targetWidth) {
+  const probe = document.createElement("canvas").getContext("2d");
+  const REF = 100;
+  probe.font = "400 " + REF + "px " + DISPLAY_FONT;
+  probe.letterSpacing = (LETTER_SPACING * REF) + "px";
+  let widest = 0;
+  for (const l of lines) widest = Math.max(widest, probe.measureText(l).width);
+  const padRef = PADDING * REF;
+  const aspect = (widest + padRef * 2) / (lines.length * REF * LINE_HEIGHT + padRef * 2);
+
+  const width = Math.round(targetWidth / 4) * 4;
+  const height = Math.round(width / aspect / 4) * 4;
+  const fontSize = (width / (widest + padRef * 2)) * REF;
+  const lineHeightPx = fontSize * LINE_HEIGHT;
+
+  const c = document.createElement("canvas");
+  c.width = width; c.height = height;
+  const ctx = c.getContext("2d");
+  ctx.font = "400 " + fontSize + "px " + DISPLAY_FONT;
+  ctx.letterSpacing = (LETTER_SPACING * fontSize) + "px";
+  ctx.fillStyle = "#ffffff";
+  ctx.textAlign = "left";
+  ctx.textBaseline = "alphabetic";
+  const blockH = lines.length * lineHeightPx;
+  const top = (height - blockH) / 2;
+  lines.forEach((line, i) => {
+    ctx.fillText(line, (width - ctx.measureText(line).width) / 2, top + i * lineHeightPx + lineHeightPx * 0.76);
+  });
+  return { canvas: c, aspect };
+}
+
+const drawn = drawHeadline(LINES, 1600);
+LOG.push("texture " + drawn.canvas.width + "x" + drawn.canvas.height + " aspect=" + drawn.aspect.toFixed(3));
+
+const tex = new THREE.CanvasTexture(drawn.canvas);
+tex.minFilter = THREE.LinearMipmapLinearFilter;
+tex.magFilter = THREE.LinearFilter;
+tex.generateMipmaps = true;
+tex.needsUpdate = true;
+
+// Is anything actually painted into the texture? A blank texture is the
+// difference between "shader is broken" and "there is nothing to draw".
+{
+  const d = drawn.canvas.getContext("2d").getImageData(0, 0, drawn.canvas.width, drawn.canvas.height).data;
+  let opaque = 0;
+  for (let i = 3; i < d.length; i += 4 * 97) if (d[i] > 10) opaque++;
+  LOG.push("texture alpha coverage: " + opaque + " sampled px");
+}
+
+// --- scene -----------------------------------------------------------------
+const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
+renderer.setSize(W, H, false);
+renderer.setClearColor(0x000000, 0);
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100);
+camera.position.set(0, 0, 5);
+
+const MAX_PUFFS = 8;
+const uniforms = {
+  uTime:    { value: 0 },
+  uAmp:     { value: 0.085 },
+  uStretch: { value: 0.055 },
+  uFold:    { value: 0.012 },
+  uRadius:  { value: 0.55 },
+  uGain:    { value: 0.03 },
+  uHalfSize:{ value: new THREE.Vector2(1, 1) },
+  uSize:    { value: new THREE.Vector2(1, 1) },
+  uMap:     { value: tex },
+  uColor:   { value: new THREE.Color("#17130f") },
+  uOpacity: { value: 1 },
+  uPuffs:   { value: Array.from({ length: MAX_PUFFS }, () => new THREE.Vector4()) },
+  uPuffShape:{ value: Array.from({ length: MAX_PUFFS }, () => new THREE.Vector4(1, 0, 0.18, 0)) },
+};
+
+const material = new THREE.ShaderMaterial({
+  vertexShader: VERTEX, fragmentShader: FRAGMENT, uniforms,
+  transparent: true, depthWrite: false, side: THREE.DoubleSide,
+});
+
+// The same contain-fit the component performs every frame.
+const halfH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.position.z;
+const halfW = halfH * camera.aspect;
+const MARGIN = 0.94;
+let pw = halfW * 2 * MARGIN;
+let ph = pw / drawn.aspect;
+if (ph > halfH * 2 * MARGIN) { ph = halfH * 2 * MARGIN; pw = ph * drawn.aspect; }
+uniforms.uSize.value.set(pw, ph);
+uniforms.uHalfSize.value.set(pw / 2, ph / 2);
+uniforms.uAmp.value = ph * 0.085;
+uniforms.uRadius.value = Math.max(pw, ph) * 0.55;
+LOG.push("plane " + pw.toFixed(2) + " x " + ph.toFixed(2) + " world units");
+
+const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1, 96, 96), material);
+mesh.scale.set(pw, ph, 1);
+scene.add(mesh);
+
+// Puffs, in WORLD units, spread across the plane — the coordinate space the
+// shader now works in.
+for (let i = 0; i < Math.min(PUFFS, MAX_PUFFS); i++) {
+  const t = (i + 1) / (Math.min(PUFFS, MAX_PUFFS) + 1);
+  uniforms.uPuffs.value[i].set(
+    -pw / 2 + pw * t,
+    (i % 2 ? 1 : -1) * ph * 0.12,
+    0.12 + i * 0.06,
+    1.0,
+  );
+  uniforms.uPuffShape.value[i].set(1, 0, 0.26, 0);
+}
+LOG.push("puffs spawned: " + Math.min(PUFFS, MAX_PUFFS));
+
+// Compile once, synchronously, and report. A silent link failure here is the
+// single most common way a shader "works fine" and renders nothing.
+try {
+  renderer.render(scene, camera);
+  LOG.push("render: ok");
+} catch (e) {
+  LOG.push("render: THREW " + e.message);
+}
+const gl = renderer.getContext();
+LOG.push("gl error: " + gl.getError());
+
+// Count how much of the framebuffer the sheet actually covers.
+{
+  const px = new Uint8Array(W * H * 4);
+  gl.readPixels(0, 0, W, H, gl.RGBA, gl.UNSIGNED_BYTE, px);
+  let lit = 0;
+  for (let i = 3; i < px.length; i += 4) if (px[i] > 8) lit++;
+  LOG.push("painted coverage: " + (100 * lit / (W * H)).toFixed(2) + "% of frame");
+}
+
+flush();
+}
+</script>
+</body></html>

@@ -1,0 +1,271 @@
+/*
+ * Support + Testers: bold side-sliding typography, NO cards.
+ *
+ * Every line enters from a screen edge (odd lines left, even lines right)
+ * once the camera has ARRIVED at its tab — the section's `data-visible`
+ * flips only on `section` + `cameraAt` + in-view, never mid-flight.
+ * Only transform/opacity animate. Tall phone layouts scroll inside the
+ * [data-scrollable] well, which the journey guard explicitly exempts.
+ */
+
+.tab-sec {
+  position: relative;
+  z-index: 2;
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: clamp(96px, 13vh, 140px) clamp(20px, 4vw, 56px) clamp(48px, 7vh, 80px);
+  overflow: clip;
+}
+
+.tab-inner {
+  width: min(94vw, 1200px);
+  max-height: calc(100svh - 160px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.tab-inner::-webkit-scrollbar {
+  display: none;
+}
+
+/* One sliding line. --from: -1 enters from the left, 1 from the right. */
+.slide {
+  display: block;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(calc(var(--from, -1) * 55vw));
+  transition:
+    opacity 0.7s ease,
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 0.9s;
+  transition-delay: calc(var(--i, 0) * 110ms);
+  will-change: transform;
+}
+
+div.slide {
+  display: block;
+}
+
+.tab-sec[data-visible="true"] .slide {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+  transition:
+    opacity 0.7s ease,
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 0s;
+  transition-delay: calc(var(--i, 0) * 110ms);
+}
+
+.slide-kicker {
+  margin: 0 0 12px;
+  font-family: var(--aq-mono);
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--aq-muted);
+}
+
+.giant {
+  margin: 0 0 clamp(24px, 4vh, 44px);
+  font-family: var(--aq-sans);
+  font-weight: 800;
+  font-size: clamp(46px, 9.5vw, 148px);
+  line-height: 0.94;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  color: var(--aq-ink);
+  text-wrap: balance;
+}
+
+.giant .slide--right {
+  text-align: right;
+}
+
+/* Cardless form: hairline fields over the live render. */
+.type-form {
+  display: grid;
+  gap: 18px;
+  max-width: 640px;
+}
+
+/* Real channels printed above the form, so support is never form-only.
+   Hairline rows rather than cards, to match the rest of the section. */
+.contact-lines {
+  list-style: none;
+  margin: 0 0 26px;
+  padding: 0;
+  max-width: 640px;
+  display: grid;
+  gap: 0;
+}
+
+.contact-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--aq-ink) 14%, transparent);
+}
+
+.contact-line__label {
+  font-family: var(--aq-mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--aq-muted);
+}
+
+.contact-line__value {
+  font-family: var(--aq-sans);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--aq-ink);
+  text-decoration: none;
+  text-align: right;
+  overflow-wrap: anywhere;
+  transition: color 0.25s ease;
+}
+
+a.contact-line__value:hover {
+  color: var(--aq-tide);
+}
+
+@media (max-width: 520px) {
+  .contact-line {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .contact-line__value {
+    text-align: left;
+  }
+}
+
+.type-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.type-field {
+  display: grid;
+  gap: 6px;
+}
+
+.type-field label {
+  font-family: var(--aq-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--aq-muted);
+}
+
+.type-field input,
+.type-field select,
+.type-field textarea {
+  width: 100%;
+  padding: 10px 2px;
+  border: 0;
+  border-bottom: 2px solid color-mix(in srgb, var(--aq-ink) 32%, transparent);
+  border-radius: 0;
+  background: transparent;
+  color: var(--aq-ink);
+  font-family: var(--aq-sans);
+  font-size: clamp(16px, 1.6vw, 20px);
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.25s ease;
+}
+
+.type-field textarea {
+  min-height: 72px;
+  resize: vertical;
+  line-height: 1.4;
+}
+
+.type-field input::placeholder,
+.type-field textarea::placeholder {
+  color: color-mix(in srgb, var(--aq-muted) 70%, transparent);
+  font-weight: 400;
+}
+
+.type-field input:focus-visible,
+.type-field select:focus-visible,
+.type-field textarea:focus-visible {
+  border-bottom-color: var(--aq-ember);
+}
+
+.tab-sec--testers .type-field input:focus-visible,
+.tab-sec--testers .type-field select:focus-visible,
+.tab-sec--testers .type-field textarea:focus-visible {
+  border-bottom-color: var(--aq-tide);
+}
+
+.type-field select {
+  cursor: pointer;
+}
+
+.type-form__submit {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  padding: 14px 30px;
+  border-radius: 999px;
+  border: 1px solid var(--aq-ink);
+  background: var(--aq-ink);
+  color: var(--aq-surface);
+  font-family: var(--aq-sans);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.type-form__submit:hover {
+  background: var(--aq-tide);
+  border-color: var(--aq-tide);
+  transform: translateY(-2px);
+}
+
+.type-form__submit:focus-visible {
+  outline: 2px solid var(--aq-accent);
+  outline-offset: 4px;
+}
+
+.type-form__done {
+  margin: 0;
+  font-family: var(--aq-sans);
+  font-size: clamp(18px, 2vw, 24px);
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--aq-tide);
+  max-width: 32ch;
+}
+
+@media (max-width: 560px) {
+  .type-form__row {
+    grid-template-columns: 1fr;
+  }
+  .giant {
+    font-size: clamp(40px, 13vw, 72px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide {
+    transition: none;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+}

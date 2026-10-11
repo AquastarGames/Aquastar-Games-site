@@ -1,0 +1,11 @@
+/*
+ * Body class for the diagnostic route only, so the debug page has the same
+ * base typography as the real index.
+ */
+
+.theme-paper {
+  min-height: 100svh;
+  background: var(--aq-paper);
+  color: var(--aq-ink);
+  font-family: var(--aq-sans);
+}

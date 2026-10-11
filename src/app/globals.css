@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens.
+ * Kept as CSS custom properties so WebGL materials can read the exact same
+ * values via getComputedStyle — the DOM and the scene never drift apart.
+ *
+ * LIGHT, WARM, PAPER. Every accent is dark enough to pass 4.5:1 on --aq-paper:
+ * the bright versions of these hues (neon mint, electric blue) were picked for
+ * a dark scene and are effectively invisible here. Do not brighten them back.
+ */
+:root {
+  /* Surfaces, lightest to deepest. */
+  --aq-paper: #f4efe7; /* base page */
+  --aq-surface: #fbf8f3; /* raised — pills, cards, the toggle disc */
+  --aq-deep: #e9e1d5; /* recessed — panel body, wells */
+
+  --aq-ink: #17130f; /* primary text */
+  --aq-muted: #5f584f; /* secondary text */
+
+  --aq-accent: #1f5fa8; /* links, focus rings */
+  --aq-tide: #0a6b57; /* interactive / hover */
+  --aq-ember: #b4441c; /* warm alert accent */
+
+  --aq-mono: ui-monospace, "SF Mono", "JetBrains Mono", monospace;
+  --aq-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  /* Reserve boxes for canvases so nothing shifts when the scene loads. */
+  /* The display face for the index headline.
+     One token, read by BOTH the canvas texture and the DOM headline (see
+     lib/tokens.ts). When the two resolved the family list independently the
+     crossfade visibly jumped: the fallback that actually exists on a given
+     machine differs from the one that exists on the machine measuring it.
+     The reference uses a high-contrast didone that is not in this repo, so
+     until that file lands this is an honest editorial serif, not a guess at
+     theirs. Change it here and both layers follow. */
+  --aq-display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia,
+    "Times New Roman", serif;
+
+  --aq-canvas-hero: 100svh;
+}
+
+/*
+ * The studio wordmark is declared in app/layout.tsx, not here: a hand-written
+ * url() is never rewritten for a basePath, so it would 404 under
+ * https://<user>.github.io/<repo>/, and url(var(--aq-base)/...) is not valid
+ * CSS — the build's minifier drops the whole src declaration. The font itself
+ * stays self-hosted in public/fonts (scripts/generate-mark.ts writes it there).
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html,
+body {
+  background: var(--aq-paper);
+  color: var(--aq-ink);
+  font-family: var(--aq-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* The native cursor is intentionally left visible. CustomCursor draws a ring
+   that trails it, so the precise OS pointer still handles clicking and text
+   carets — a custom arrow always does both worse. */
+
+::selection {
+  background: var(--aq-accent);
+  color: var(--aq-surface);
+}
+
+:focus-visible {
+  outline: 2px solid var(--aq-accent);
+  outline-offset: 3px;
+}

@@ -1,0 +1,288 @@
+/* Aquastar menu — the round toggle that becomes the cross, and the panel. */
+
+.menu-toggle-slot {
+  position: fixed;
+  top: clamp(20px, 3.2vh, 34px);
+  right: clamp(20px, 3.2vw, 44px);
+  z-index: 40;
+}
+
+.menu-toggle {
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  /* The disc supplies the hit area; without this the SVG's own box decides
+     where the button responds, which is smaller than the visual circle. */
+  width: 44px;
+  height: 44px;
+}
+
+.menu-toggle:focus-visible {
+  outline: 2px solid var(--aq-accent);
+  outline-offset: 4px;
+  border-radius: 50%;
+}
+
+/* INK, not paper.
+   On the dark theme this disc was invisible until it filled, which read as the
+   button "waking up". In light it IS the resting state — a dark disc carrying
+   light bars — and when open it simply grows to its own full size. That is also
+   what the reference does. */
+.menu-toggle__disc {
+  fill: var(--aq-ink);
+  /* No transform-box / transform-origin here on purpose. GSAP animates this
+     circle's scale and owns the origin through svgOrigin, which resolves in
+     the SVG user space (22, 22) — the true centre. A CSS transform-box of
+     fill-box resolves the origin against the element's BOUNDING BOX, so a
+     transform-origin of 22px lands 1px off centre and the fill visibly grows
+     from a corner instead of from the middle. */
+}
+
+/* The plate sits under the disc at the same radius, so the control reads as a
+   circle in every state instead of as two dots floating in space. One shade off
+   the paper it is subtle by design; the hairline is what keeps it legible as a
+   shape rather than as a faint smudge. */
+.menu-toggle__plate {
+  fill: var(--aq-surface);
+  stroke: color-mix(in srgb, var(--aq-ink) 16%, transparent);
+  stroke-width: 1;
+}
+
+.menu-toggle__bar {
+  /* INK while closed. The disc sits at scale(0) at rest, so on a light page
+     these two dots ARE the entire resting state — stroking them in the surface
+     colour made them invisible against the paper. */
+  stroke: var(--aq-ink);
+  /* Short delay: the dots stay dark for the first beat while they spread,
+     then flip to light as the ink disc fills in behind them. */
+  transition: stroke 0.22s ease 0.12s;
+}
+
+.menu-toggle[data-open="true"] .menu-toggle__bar {
+  stroke: var(--aq-surface);
+}
+
+/* Hover only reads while the disc is absent — dark green on the ink disc
+   would be invisible. */
+.menu-toggle:not([data-open="true"]):hover .menu-toggle__bar {
+  stroke: var(--aq-tide);
+}
+
+/* ------------------------------------------------------------------- panel */
+
+.menu-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  /* 40% of the viewport per the reference, with a floor so the type stays
+     readable on short/narrow screens and a cap on very wide ones. */
+  width: clamp(320px, 40vw, 760px);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(80px, 14vh, 150px) clamp(28px, 3.4vw, 58px) clamp(32px, 5vh, 56px);
+  /* Raised, not merely different. On a light page a panel one shade off the
+     background reads as nothing — the reference separates the panel from the
+     content because the content is a photo. Here it needs the other half of
+     the trick: a lighter surface plus a soft cast shadow. */
+background: var(--aq-surface);
+  box-shadow: -24px 0 60px -30px color-mix(in srgb, var(--aq-ink) 38%, transparent);
+  color: var(--aq-ink);
+  /* Closed = translated out and unfocusable. `visibility` keeps it out of the
+     tab order and out of hit-testing without needing a second class. */
+  transform: translateX(100%);
+  visibility: hidden;
+  /* Both the slide and its item stagger start after a beat, matching the
+     toggle's own START_DELAY. Starting the panel on the click frame while the
+     circle is still filling makes the two read as separate events instead of
+     one gesture. */
+  transition:
+    transform 0.62s cubic-bezier(0.22, 1, 0.36, 1) 0.12s,
+    visibility 0s linear 0.74s;
+}
+
+.menu-panel[data-open="true"] {
+  transform: translateX(0);
+  visibility: visible;
+  transition:
+    transform 0.62s cubic-bezier(0.22, 1, 0.36, 1) 0.12s,
+    visibility 0s linear 0s;
+}
+
+.menu-panel__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.menu-panel__item {
+  /* Staggered by index, driven by the custom property set in JSX. */
+  opacity: 0;
+  transform: translateY(26px);
+  transition:
+    opacity 0.5s ease,
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--i) * 55ms + 120ms);
+}
+
+.menu-panel[data-open="true"] .menu-panel__item {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.menu-panel__link {
+  display: flex;
+  align-items: baseline;
+  gap: clamp(14px, 1.6vw, 26px);
+  padding: clamp(4px, 0.6vh, 10px) 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.menu-panel__num {
+  font-family: var(--aq-mono);
+  font-size: clamp(11px, 0.85vw, 13px);
+  letter-spacing: 0.08em;
+  color: var(--aq-muted);
+  /* The number is optically lighter than the label, per the reference. */
+  opacity: 0.75;
+  transition: color 0.3s ease;
+}
+
+.menu-panel__label {
+  font-family: var(--aq-sans);
+  font-size: clamp(30px, 4.2vw, 62px);
+  font-weight: 300;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  transition:
+    color 0.3s ease,
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.menu-panel__link:hover .menu-panel__label,
+.menu-panel__link:focus-visible .menu-panel__label {
+  color: var(--aq-tide);
+  /* The word leans into the wind rather than just changing colour. */
+  transform: translateX(10px);
+}
+
+.menu-panel__link:hover .menu-panel__num,
+.menu-panel__link:focus-visible .menu-panel__num {
+  color: var(--aq-tide);
+}
+
+.menu-panel__link:focus-visible {
+  outline: none;
+}
+
+.menu-panel__foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding-top: 28px;
+  border-top: 1px solid color-mix(in srgb, var(--aq-ink) 12%, transparent);
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.5s ease 0.34s,
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.34s;
+}
+
+.menu-panel[data-open="true"] .menu-panel__foot {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* The legal group, where the contact block used to sit.
+   Quieter than the numbered index above: these are secondary destinations, and
+   at the size the eye expects for contact details they would read as index
+   entries and compete with the main list. */
+.menu-panel__legal {
+  display: grid;
+  gap: 8px;
+}
+
+.menu-panel__legal-label {
+  margin: 0;
+  font-family: var(--aq-mono);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--aq-muted);
+  opacity: 0.8;
+}
+
+.menu-panel__legal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.menu-panel__legal-link {
+  display: inline-block;
+  color: var(--aq-ink);
+  font-family: var(--aq-sans);
+  font-size: clamp(13px, 1vw, 15px);
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+
+.menu-panel__legal-link:hover,
+.menu-panel__legal-link:focus-visible {
+  color: var(--aq-tide);
+}
+
+.menu-panel__socials {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  text-align: right;
+}
+
+.menu-panel__social {
+  color: var(--aq-ink);
+  font-family: var(--aq-sans);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+
+.menu-panel__social:hover {
+  color: var(--aq-tide);
+}
+
+/* ------------------------------------------------------------------ mobile */
+
+@media (max-width: 720px) {
+  .menu-panel {
+    /* Below 720px a 40% panel is unusable; full-bleed is the honest answer. */
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-panel,
+  .menu-panel__item,
+  .menu-panel__foot {
+    transition-duration: 0.01ms;
+    transition-delay: 0s;
+  }
+  .menu-panel__item,
+  .menu-panel__foot {
+    transform: none;
+  }
+}

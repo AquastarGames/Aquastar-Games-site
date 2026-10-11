@@ -1,0 +1,243 @@
+/*
+ * The hanami backdrop: scene tokens and the layer itself.
+ *
+ * ── Why these tokens exist ──────────────────────────────────────────────────
+ * globals.css states the rule that lib/tokens.ts exists to keep: design tokens
+ * are CSS custom properties "so WebGL materials can read the exact same values
+ * via getComputedStyle — the DOM and the scene never drift apart". Every colour
+ * in this scene is one of them. There is not a single hex literal in any
+ * material, uniform or shader in features/hanami.
+ *
+ * ── The value ceiling ───────────────────────────────────────────────────────
+ * The studio page is light, warm and paper, and the index headline is near-black
+ * ink sitting in the middle of the viewport. That fixes the one hard constraint
+ * on this whole scene: NOTHING IN THE CANVAS MAY GO DARKER THAN MID-STONE, or
+ * it eats the headline's contrast ratio. Every value below is chosen to sit
+ * between paper and mid-stone. The darkest thing in the picture is the type.
+ *
+ * That constraint is also why the scene is composed the way it is. It is not a
+ * dark, dramatic, neon Colosseum with white text — the text is ink, and ink on
+ * a dark scene is a design failure, however good the scene is. The scene is an
+ * ink-wash print of a Colosseum in Japan, in the hours either side of dawn.
+ */
+
+:root {
+  /*
+   * Scene tokens, and the one hard constraint on all of them.
+   *
+   * NOTHING IN THIS BLOCK MAY GO DARKER THAN MID-STONE. The site is light,
+   * warm and paper, and the index headline is near-black ink sitting in the
+   * middle of the viewport. Anything that goes dark behind it eats the ink's
+   * contrast ratio and the type stops being the subject of the page. The
+   * darkest values in the whole canvas are `--aq-bark` and
+   * `--aq-water-deep`, both mid-value, both far from the headline.
+   */
+
+  /* ── Sky ──────────────────────────────────────────────────────────────── */
+  /* Lighter than --aq-paper on purpose: the dome sits ABOVE the page colour,
+     so a horizon between them does not appear as a hard edge. The whole top
+     half of the frame is this, which is the headline's band. */
+  --aq-horizon: #f4f0e8;
+  --aq-zenith: #e3e6e9;
+  --aq-sun: #f6e9d2;
+
+  /* ── Air ──────────────────────────────────────────────────────────────── */
+  /* Scene fog AND the mist sheets — one value, two consumers. If they differ
+     the mist has a visible edge where it ends. */
+  --aq-mist: #eae5dc;
+
+  /* ── Land ─────────────────────────────────────────────────────────────── */
+  /* Fuji and the ranges. Cool and desaturated — distance is blue, and these are
+     the only cool tones in the scene, which is what puts them behind it. */
+  --aq-fuji: #8d9db0;
+
+  /* Travertine. Standing wall, weathered face on one side, ruined inner ring
+     damper and greener because it has been inside the weather for two
+     thousand years. */
+  --aq-stone: #c9bcaa;
+  --aq-stone-deep: #9c9084;
+  --aq-sand: #d5cbb8;
+
+  /* ── Interior ─────────────────────────────────────────────────────────── */
+  /* The dark seen through the arcade openings. This is the value that gives the
+     Colosseum its depth: without it the openings are windows onto sky and 80
+     pale arches read as a decorative band. Sits at the ceiling, and only ever
+     appears in the gaps. */
+  --aq-interior: #4a423b;
+
+  /* ── Shoreline ───────────────────────────────────────────────────────── */
+  /* Wet beach, dry grass, the island the arena is standing in. Same value
+     ceiling — the only band that has to read as LAND rather than as stone,
+     because the Colosseum is in the middle of a flood. */
+  --aq-shore-wet: #a9aa9e;
+  --aq-shore: #bab6a0;
+  --aq-shore-dry: #c5bfa4;
+
+  /* ── Water ────────────────────────────────────────────────────────────── */
+  /* Drain terminology: near-shore vs deep, so the value ceiling is explicit. */
+  --aq-water: #8a9c98;
+  --aq-water-deep: #5a6f6d;
+
+  /* ── Blossom ──────────────────────────────────────────────────────────── */
+  /* Pale at the calyx, saturated at the tip, paler rim. The tip is the only
+     saturated hue in the picture, so it is doing a great deal of work: a petal
+     the same value as the sky behind it is invisible, and a field of invisible
+     petals is not a field. This value is dark enough to read against the light
+     half of the frame and still inside the value ceiling. */
+  --aq-sakura: #e8c9d4;
+  --aq-sakura-deep: #c4708e;
+  --aq-petal-rim: #f7e9ec;
+  --aq-bark: #6b5f56;
+}
+
+/*
+ * The layer.
+ *
+ * fixed, not absolute: the scene is a backdrop for the document, not a section
+ * of it. z-index 0 puts it behind the hero (z-index 2) and behind the menu
+ * overlay, and the page body keeps its own paper colour underneath so the whole
+ * thing still degrades to "a light page" if the canvas never arrives.
+ */
+.hanami {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  contain: strict;
+  background: var(--aq-paper);
+}
+
+.hanami canvas {
+  display: block;
+}
+
+/*
+ * The veil under the headline.
+ *
+ * One soft ellipse, sized to the headline block and no larger. A full-canvas
+ * scrim would flatten the picture it exists to protect; this lifts exactly the
+ * band that .hero__center occupies and leaves the arena, the water and the
+ * fish-eye corners untouched.
+ *
+ * It is a mask, not a background: the paper colour fades out entirely, so where
+ * the veil is not, the render is completely unobstructed.
+ */
+.hanami__veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 46% 30% at 50% 52%,
+    color-mix(in srgb, var(--aq-paper) 62%, transparent) 0%,
+    color-mix(in srgb, var(--aq-paper) 34%, transparent) 45%,
+    transparent 72%
+  );
+}
+
+@media (max-width: 720px) {
+  /* Portrait: the headline block is taller and the arena sits lower in frame,
+     so the veil follows the type rather than the viewport. */
+  .hanami__veil {
+    background: radial-gradient(
+      ellipse 78% 24% at 50% 50%,
+      color-mix(in srgb, var(--aq-paper) 64%, transparent) 0%,
+      color-mix(in srgb, var(--aq-paper) 36%, transparent) 48%,
+      transparent 76%
+    );
+  }
+}
+
+/*
+ * Reduced motion.
+ *
+ * The scene already renders a still frame on this preference — lib/quality.ts
+ * locks the tier to low, which freezes the petals, the ripples and the camera
+ * at a composed frame rather than removing them. What is disabled HERE is the
+ * CSS: no veil pulse, no fade-in. A still photograph should arrive as a still
+ * photograph.
+ */
+/*
+ * The dive dressing (games tab): a deep-teal veil over the whole frame that
+ * fades in across the flight, two slow light shafts, and a one-shot surface
+ * flash. Plain gradients only — no backdrop-filter on a fullscreen layer.
+ */
+.hanami__dive {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  background:
+    radial-gradient(
+      ellipse 120% 90% at 50% 0%,
+      color-mix(in srgb, #bfe3dc 26%, transparent) 0%,
+      transparent 55%
+    ),
+    linear-gradient(to bottom, #16424e 0%, #0d2f39 55%, #081f27 100%);
+}
+
+.hanami__dive[data-diving="true"] {
+  opacity: 0.6;
+}
+
+.hanami__shaft {
+  position: absolute;
+  top: -10%;
+  height: 120%;
+  width: clamp(120px, 14vw, 260px);
+  background: linear-gradient(to bottom, #cfeee8 0%, transparent 75%);
+  opacity: 0.16;
+  filter: blur(18px);
+}
+
+.hanami__shaft--a {
+  left: 22%;
+  transform: skewX(-12deg);
+}
+
+.hanami__shaft--b {
+  right: 20%;
+  transform: skewX(9deg);
+}
+
+.hanami__flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 90% 70% at 50% 45%,
+    #e8f6f2 0%,
+    transparent 65%
+  );
+  opacity: 0;
+  animation: hanami-flash 0.9s ease-out;
+}
+
+@keyframes hanami-flash {
+  0% {
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hanami__dive {
+    transition: none;
+  }
+  .hanami__flash {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hanami,
+  .hanami__veil {
+    animation: none !important;
+    transition: none !important;
+  }
+}

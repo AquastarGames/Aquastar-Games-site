@@ -1,0 +1,197 @@
+/*
+ * Selected games, after the reference: light page, centred title, filter
+ * pills, two-column cards. Type stays ink; the thumbs carry the dive —
+ * deep-teal gradients with a glow, tuned to sit under the underwater veil.
+ * Inherits .tab-sec / .slide from apply.css.
+ */
+
+.games-sec .tab-inner {
+  width: min(94vw, 1240px);
+}
+
+.games-inner {
+  display: grid;
+  justify-items: center;
+  gap: clamp(18px, 3vh, 30px);
+}
+
+.games-title {
+  font-family: var(--aq-sans);
+  font-weight: 700;
+  font-size: clamp(44px, 6.4vw, 96px);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  color: var(--aq-surface);
+  text-align: center;
+  margin: 0;
+  /* Ink would drown under the dive veil — the one section where paper wins. */
+  text-shadow: 0 2px 30px color-mix(in srgb, #04141a 55%, transparent);
+}
+
+.games-pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--aq-surface) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--aq-surface) 80%, transparent);
+}
+
+.games-pill {
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--aq-ink);
+  font-family: var(--aq-sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 0.25s ease,
+    color 0.25s ease;
+}
+
+.games-pill sup {
+  font-size: 0.7em;
+  margin-left: 3px;
+  opacity: 0.7;
+}
+
+.games-pill:hover {
+  background: color-mix(in srgb, var(--aq-ink) 8%, transparent);
+}
+
+.games-pill[data-active="true"] {
+  background: var(--aq-ink);
+  color: var(--aq-surface);
+}
+
+.games-pill:focus-visible {
+  outline: 2px solid var(--aq-accent);
+  outline-offset: 2px;
+}
+
+.games-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(16px, 2.6vw, 36px);
+}
+
+/* A lone card should read as the featured game, not as half an empty grid. */
+.games-grid[data-count="1"] {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 640px;
+}
+
+.games-card article {
+  display: grid;
+  gap: 12px;
+}
+
+.games-thumb {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  border-radius: 6px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 110%, #2b7f8f 0%, transparent 70%),
+    linear-gradient(to bottom, #0a2530 0%, #10414e 60%, #0b2b34 100%);
+}
+
+.games-thumb[data-hue="1"] {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 110%, #3d6f9e 0%, transparent 70%),
+    linear-gradient(to bottom, #0b1f33 0%, #16395c 60%, #0b2237 100%);
+}
+
+.games-thumb[data-hue="2"] {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 110%, #2b8f7a 0%, transparent 70%),
+    linear-gradient(to bottom, #08231e 0%, #134941 60%, #0a2a25 100%);
+}
+
+.games-thumb[data-hue="3"] {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 110%, #7a5fa8 0%, transparent 70%),
+    linear-gradient(to bottom, #171233 0%, #352a63 60%, #1d1740 100%);
+}
+
+.games-thumb__num {
+  font-family: var(--aq-sans);
+  font-weight: 800;
+  font-size: clamp(72px, 9vw, 150px);
+  letter-spacing: -0.04em;
+  color: color-mix(in srgb, var(--aq-surface) 26%, transparent);
+  line-height: 1;
+}
+
+.games-thumb__glow {
+  position: absolute;
+  left: 50%;
+  bottom: 12%;
+  width: 34%;
+  aspect-ratio: 1.4 / 1;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at center, #bde9ff 0%, transparent 70%);
+  opacity: 0.75;
+  filter: blur(6px);
+}
+
+.games-card__row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid color-mix(in srgb, var(--aq-surface) 38%, transparent);
+}
+
+.games-card__title {
+  margin: 0;
+  font-family: var(--aq-sans);
+  font-size: clamp(19px, 2vw, 26px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--aq-surface);
+  text-shadow: 0 1px 18px color-mix(in srgb, #04141a 60%, transparent);
+}
+
+.games-card__tags {
+  margin: 2px 0 0;
+  font-family: var(--aq-sans);
+  font-size: 14px;
+  color: color-mix(in srgb, var(--aq-surface) 78%, transparent);
+}
+
+.games-card__arrow {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--aq-surface) 55%, transparent);
+  color: var(--aq-surface);
+  font-size: 16px;
+}
+
+@media (max-width: 720px) {
+  .games-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .games-card {
+    transition: none;
+  }
+}

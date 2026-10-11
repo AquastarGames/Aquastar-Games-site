@@ -1,0 +1,163 @@
+/* Aquastar index — the paper headline plane and the hero layout. */
+
+/* The canvas fills its container and must never eat a click. */
+.paper-plane {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.paper-plane canvas {
+  display: block;
+}
+
+.hero {
+  position: relative;
+  z-index: 2;
+  min-height: 100svh;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  /* Clears the fixed site header — the hero owns no bar of its own. */
+  padding: clamp(84px, 13vh, 130px) clamp(20px, 3.2vw, 44px) clamp(24px, 4vh, 44px);
+}
+
+/* The headline block, optically centred with the eyebrow above and the CTA
+   beneath, matching the reference's vertical stack. */
+.hero__center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(20px, 3.2vh, 38px);
+}
+
+/* Small caps line above the headline. Sits close to the headline — the
+   reference lets the type nearly touch. */
+.hero__eyebrow {
+  margin: 0;
+  font-family: var(--aq-sans);
+  font-size: clamp(10px, 0.95vw, 13px);
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--aq-ink);
+  text-align: center;
+  opacity: 0.8;
+}
+
+/* The visual headline is the WebGL plane. This box reserves the space it
+   occupies, so nothing shifts when the texture finishes loading. The plane is
+   contain-fitted to it, so the exact ratio only has to be close. */
+.hero__stage {
+  position: relative;
+  width: min(92vw, 1100px);
+  aspect-ratio: 2.6 / 1;
+}
+
+/* The visible headline is real DOM text. The WebGL plane draws the same words
+   on top and crossfades it out once the canvas has produced a frame — see
+   ARCHITECTURE §2.5, "content is HTML, canvas is enhancement".
+
+   Until the canvas reports ready this is the ONLY thing rendering the
+   headline, and that is the point: if WebGL is missing, blocked, still
+   compiling, or measured at 0x0, the visitor still reads the words. */
+.hero__title {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--aq-display);
+  font-weight: 400;
+  /* Sized so the longest line fills the stage: the canvas plane is
+     contain-fitted to the same box, so both layers agree on the measure. */
+  font-size: clamp(32px, 7.4vw, 116px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  text-align: center;
+  color: var(--aq-ink);
+  transition: opacity 0.45s ease;
+}
+
+.hero__stage[data-canvas="ready"] .hero__title {
+  opacity: 0;
+  /* Left in the DOM, not removed: it stays indexable and reachable by
+     assistive tech while the canvas owns the pixels. */
+  pointer-events: none;
+}
+
+.hero__cta {
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 30px;
+  /* On a light page a lighter pill alone is invisible — the hairline is what
+     makes it read as an object rather than as a smudge of background. */
+  border: 1px solid color-mix(in srgb, var(--aq-ink) 18%, transparent);
+  border-radius: 999px;
+  background: var(--aq-surface);
+  color: var(--aq-ink);
+  font-family: var(--aq-sans);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Inverts on hover. On a dark theme a hover had nowhere to go but brighter;
+   here it swaps to the ink, which is the strongest move available. */
+.hero__cta:hover {
+  background: var(--aq-ink);
+  border-color: var(--aq-ink);
+  color: var(--aq-surface);
+  transform: translateY(-2px);
+}
+
+.hero__cta:focus-visible {
+  outline: 2px solid var(--aq-tide);
+  outline-offset: 4px;
+}
+
+.hero__cta-arrow {
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hero__cta:hover .hero__cta-arrow {
+  transform: translate(3px, 3px);
+}
+
+.hero__foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* ©year, bottom right. */
+.hero__year {
+  font-family: var(--aq-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--aq-muted);
+}
+
+@media (max-width: 720px) {
+  .hero__stage {
+    width: 88vw;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__cta,
+  .hero__cta-arrow {
+    transition: none;
+  }
+}
