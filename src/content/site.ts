@@ -33,8 +33,8 @@ export const studio = {
   ],
   /** The support address the studio answers on. Canonical contact everywhere. */
   supportEmail: "aquastarsupport@gmail.com",
-  /** Testers have their own inbox, so programme mail never competes with bugs. */
-  testersEmail: "testers@aquastargames.com",
+  /** Testers write to the canonical inbox — the separate domain mailbox never existed. */
+  testersEmail: "aquastarsupport@gmail.com",
   /** Telegram is where invites land fastest. */
   telegram: "https://t.me/aquastargames",
   telegramHandle: "@aquastargames",
