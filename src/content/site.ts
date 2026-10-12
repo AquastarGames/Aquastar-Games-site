@@ -31,8 +31,8 @@ export const studio = {
     { num: "0", label: "Player accounts" },
     { num: "100%", label: "Playable offline" },
   ],
-  /** The support address the studio answers on. */
-  supportEmail: "support@aquastargames.com",
+  /** The support address the studio answers on. Canonical contact everywhere. */
+  supportEmail: "aquastarsupport@gmail.com",
   /** Testers have their own inbox, so programme mail never competes with bugs. */
   testersEmail: "testers@aquastargames.com",
   /** Telegram is where invites land fastest. */
