@@ -89,7 +89,7 @@ export const legalDocs: LegalDoc[] = [
         items: [
           "The Application does not require an account and does not provide chat or social profiles.",
           "Game progress and settings are stored locally and are removed when app data is cleared or the Application is uninstalled, subject to operating-system backups.",
-          "Advertising is delivered through Unity LevelPlay mediation. The current mediation stack includes Unity Ads and Yandex Mobile Ads; AppLovin may be added in a future update.",
+          "Advertising is delivered through Unity LevelPlay mediation. The current mediation stack includes Unity Ads and Yandex Mobile Ads; the Yandex adapter also bundles AppMetrica analytics. AppLovin may be added in a future update.",
         ],
       },
       {
@@ -127,7 +127,7 @@ export const legalDocs: LegalDoc[] = [
       },
       {
         kind: "p",
-        text: "This information is used by the relevant providers for ad delivery, frequency capping, fraud prevention and measurement. The Application uses `INTERNET`, `ACCESS_NETWORK_STATE` and `AD_ID` for these functions. `VIBRATE` supports haptics and is not used for data collection.",
+        text: "This information is used by the relevant providers for ad delivery, frequency capping, fraud prevention and measurement. The Application declares the permissions `INTERNET`, `ACCESS_NETWORK_STATE`, `AD_ID` and `VIBRATE`. `VIBRATE` supports haptics and is not used for data collection. The bundled advertising SDKs additionally contribute `ACCESS_ADSERVICES_TOPICS`, `ACCESS_ADSERVICES_ATTRIBUTION`, `WAKE_LOCK`, `RECEIVE_BOOT_COMPLETED`, `FOREGROUND_SERVICE` and `BIND_GET_INSTALL_REFERRER_SERVICE`; these are added by those libraries rather than requested by the game itself, and are used for ad delivery, attribution and background upload of ad events. The game has no feature that depends on them.",
       },
       {
         kind: "h3",
@@ -144,6 +144,7 @@ export const legalDocs: LegalDoc[] = [
           "[Unity Ads / LevelPlay](https://unity.com/legal/privacy-policy) — Unity Privacy Policy",
           "[ironSource / Unity LevelPlay](https://www.is.com/privacy-policy/) — ironSource Privacy Policy and [LevelPlay documentation](https://docs.unity.com/grow/levelplay/)",
           "[Yandex Mobile Ads](https://yandex.com/legal/confidential/) — Yandex Privacy Policy",
+          "[AppMetrica](https://appmetrica.yandex.com/privacy/) — AppMetrica Privacy Policy (bundled with the Yandex adapter)",
           "[AppLovin](https://www.applovin.com/privacy/), if enabled in a future release — AppLovin Privacy Policy",
         ],
       },
@@ -157,7 +158,7 @@ export const legalDocs: LegalDoc[] = [
       },
       {
         kind: "p",
-        text: "The Application does not set browser cookies. Third-party advertising SDKs may use SDK-local identifiers and similar technologies for delivery, frequency capping and measurement. Where consent is required by law, the Application requests it through the applicable consent-management flow before personalised advertising is shown.",
+        text: "The Application does not set browser cookies. Third-party advertising SDKs may use SDK-local identifiers and similar technologies for delivery, frequency capping and measurement. The Application contains no in-game consent dialog and requests no consent prompt: personalised advertising is limited by the device-level controls described in section 7, and by the region and age settings configured by the ad providers themselves.",
       },
       {
         kind: "p",
@@ -381,14 +382,14 @@ export const legalDocs: LegalDoc[] = [
       { kind: "h3", text: "2. Advertising" },
       {
         kind: "p",
-        text: "Advertising is delivered through **Unity LevelPlay**, including Unity Ads and Yandex Mobile Ads. Advertising SDKs may process advertising identifiers, technical device information, IP address, impressions and ad interactions under their own policies. AppLovin may be added in a future update.",
+        text: "Advertising is delivered through **Unity LevelPlay**, including Unity Ads and Yandex Mobile Ads; the Yandex adapter also bundles AppMetrica analytics. Advertising SDKs may process advertising identifiers, technical device information, IP address, impressions and ad interactions under their own policies. AppLovin may be added in a future update.",
       },
       { kind: "h3", text: "3. Your rights and controls" },
       {
         kind: "ul",
         items: [
           "Uninstalling the game stops further collection by the game.",
-          "To opt out of personalised ads, use the in-game consent flow or Android → Privacy → Ads → “Delete advertising ID”.",
+          "To opt out of personalised ads, use Android → Privacy → Ads → “Delete advertising ID”. The game itself contains no consent dialog.",
           `Access, correction, deletion and consent-withdrawal requests: **${LEGAL_CONTACT}**.`,
         ],
       },
