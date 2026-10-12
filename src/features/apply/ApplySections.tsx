@@ -146,7 +146,17 @@ function SupportForm() {
     <form
       className="type-form"
       onSubmit={(e) => {
+        // Статики без бэкенда: форма не отправляет данные никуда сама —
+        // она собирает письмо в почтовом клиенте пользователя. Показывать
+        // "получено" без отправки было бы враньём с потерей обращений.
         e.preventDefault();
+        const data = new FormData(e.currentTarget);
+        const get = (k: string) => String(data.get(k) ?? "");
+        const subject = `Support: ${get("topic")} — ${get("game")}`;
+        const body = `Name: ${get("name")}\nEmail: ${get("email")}\nGame: ${get("game")}\nTopic: ${get("topic")}\n\n${get("message")}`;
+        window.location.href =
+          `mailto:${studio.supportEmail}?subject=${encodeURIComponent(subject)}` +
+          `&body=${encodeURIComponent(body)}`;
         setSent(true);
       }}
     >
@@ -200,7 +210,9 @@ function SupportForm() {
       </div>
       {sent ? (
         <p className="type-form__done" role="status">
-          Received — the support crew replies within two working days.
+          Opening your mail app with the request ready — press Send there to deliver it.
+          Nothing was sent yet: without that press we receive nothing. If nothing opened,
+          write to {studio.supportEmail} directly.
         </p>
       ) : (
         <button className="type-form__submit" type="submit">
@@ -217,7 +229,16 @@ function TestersForm() {
     <form
       className="type-form"
       onSubmit={(e) => {
+        // Та же схема, что в SupportForm: статика без бэкенда, письмо
+        // собирается в клиенте пользователя, а не "уходит" в никуда.
         e.preventDefault();
+        const data = new FormData(e.currentTarget);
+        const get = (k: string) => String(data.get(k) ?? "");
+        const subject = `Tester application — ${get("platform")} / ${get("experience")}`;
+        const body = `Name: ${get("name")}\nEmail: ${get("email")}\nPlatform: ${get("platform")}\nExperience: ${get("experience")}\n\n${get("why")}`;
+        window.location.href =
+          `mailto:${studio.testersEmail}?subject=${encodeURIComponent(subject)}` +
+          `&body=${encodeURIComponent(body)}`;
         setSent(true);
       }}
     >
@@ -266,7 +287,9 @@ function TestersForm() {
       </div>
       {sent ? (
         <p className="type-form__done" role="status">
-          You are on the list — invites for the next closed playtest go out by email.
+          Opening your mail app with the application ready — press Send there to deliver it.
+          Nothing was sent yet: without that press we receive nothing. If nothing opened,
+          write to {studio.testersEmail} directly.
         </p>
       ) : (
         <button className="type-form__submit" type="submit">
