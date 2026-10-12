@@ -188,7 +188,33 @@ export const legalDocs: LegalDoc[] = [
           "Device-level controls include Android Settings → Privacy → Ads → “Delete advertising ID”, together with the controls offered by Google, Yandex and AppLovin.",
         ],
       },
-      { kind: "h3", text: "8. Retention" },
+      { kind: "h3", text: "8. How to request deletion of your data" },
+      {
+        kind: "p",
+        text: `This section is the deletion-request guide for **${PRODUCT}** by **${OPERATOR}**, as required by Google Play. There are no accounts: nothing identifies you on our side, so a request needs no login and no user ID.`,
+      },
+      {
+        kind: "ul",
+        items: [
+          `Step 1 — email us: write to **${LEGAL_CONTACT}** with the subject “Data deletion — ${PRODUCT}”. Any mailbox works; no account or identifier is required.`,
+          "Step 2 — we reply within 30 days confirming: (a) we hold no server-side copy of your data, so there is nothing to delete on our servers; (b) how to remove local data, see Step 3; (c) where provider-held data lives and how to limit it, see Step 4.",
+          "Step 3 — remove local data now, without waiting for our reply: uninstall the Application, or clear its app data via Android Settings → Apps → Block: Build It Up → Storage → Clear data. This deletes progress, settings, coins, hearts and boosters from the device immediately.",
+          "Step 4 — stop provider-side collection: Android Settings → Privacy → Ads → “Delete advertising ID”, plus the opt-outs of Google, Yandex and AppLovin linked in §4.",
+        ],
+      },
+      {
+        kind: "p",
+        text: "What is deleted, what is kept, and for how long:",
+      },
+      {
+        kind: "ul",
+        items: [
+          `Deleted immediately: the local save (progress, coins, hearts, boosters, settings) on uninstall or Clear data. No server copy exists, so nothing of yours is retained by ${OPERATOR} afterwards.`,
+          "Not deletable by us: advertising identifiers, device information, IP address and ad interactions already sent to Unity, Yandex or AppLovin — retained under their own policies (typically up to 24 months for identifiers and logs). We cannot delete provider-held data; Step 4 limits further collection.",
+          "Kept as required: our email correspondence about your request, for as long as needed to handle it and as required by applicable law.",
+        ],
+      },
+      { kind: "h3", text: "9. Retention" },
       {
         kind: "ul",
         items: [
@@ -197,12 +223,12 @@ export const legalDocs: LegalDoc[] = [
           "Information required for legal compliance is retained for the period required by applicable law.",
         ],
       },
-      { kind: "h3", text: "9. Children" },
+      { kind: "h3", text: "10. Children" },
       {
         kind: "p",
         text: "The Application is a general-audience casual puzzle game and is not directed at children under the applicable age of digital consent. Aquastar Games does not conduct behavioural profiling. Where required by law, personalised advertising to a user below the applicable threshold is shown only with verifiable parental consent; otherwise contextual or non-personalised advertising is used.",
       },
-      { kind: "h3", text: "10. Security and policy changes" },
+      { kind: "h3", text: "11. Security and policy changes" },
       {
         kind: "p",
         text: `${OPERATOR} applies reasonable safeguards to the code and configuration it controls. No method of storage or transmission is completely secure. If a breach affecting personal information under our control occurs, we will provide notice as required by law.`,
@@ -211,7 +237,7 @@ export const legalDocs: LegalDoc[] = [
         kind: "p",
         text: `Material changes will be published with a new effective date. Where legally required, consent will be requested before the change takes effect. Previous versions are available from **${LEGAL_CONTACT}**.`,
       },
-      { kind: "h3", text: "11. Contact" },
+      { kind: "h3", text: "12. Contact" },
       {
         kind: "p",
         text: `For privacy questions or requests, contact **${LEGAL_CONTACT}**. The Service Provider is ${OPERATOR}.`,
